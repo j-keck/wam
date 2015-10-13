@@ -4,7 +4,7 @@ import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.scalajs.js
-import scalatags.JsDom.all._
+
 
 object log {
 

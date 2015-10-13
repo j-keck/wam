@@ -26,30 +26,12 @@ package object shared {
 
 
   /**
-   * mouse click event: up / down
+   * mouse click event
    */
-  type MouseBtn = Int
+  case class MouseClickEvent(x: Double, y: Double) extends WAMEvent
 
-  sealed trait MouseClickEvent extends WAMEvent {
-    val btn: MouseBtn
-
-    def isLeft = btn == 0
-
-    def istMiddle = btn == 1
-
-    def isRight = btn == 2
-  }
-
-  case class MouseDown(btn: MouseBtn) extends MouseClickEvent
-
-  object MouseDown {
-    implicit val discriminator: Discriminator[WAMEvent, MouseDown, Int] = Discriminator(2)
-  }
-
-  case class MouseRelease(btn: MouseBtn) extends MouseClickEvent
-
-  object MouseRelease {
-    implicit val discriminator: Discriminator[WAMEvent, MouseRelease, Int] = Discriminator(3)
+  object MouseClickEvent {
+    implicit val discriminator: Discriminator[WAMEvent, MouseClickEvent, Int] = Discriminator(2)
   }
 
 
@@ -59,7 +41,7 @@ package object shared {
   case class ScrollEvent(top: Int, left: Int) extends WAMEvent
 
   object ScrollEvent {
-    implicit val discriminator: Discriminator[WAMEvent, ScrollEvent, Int] = Discriminator(4)
+    implicit val discriminator: Discriminator[WAMEvent, ScrollEvent, Int] = Discriminator(3)
   }
 
 }

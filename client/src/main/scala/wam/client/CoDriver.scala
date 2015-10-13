@@ -14,16 +14,14 @@ import scala.scalajs.js.JSApp
 object CoDriver extends JSApp with Log2Console with WSSupport {
 
   val doc = dom.document
-  var x, y = 0.0
+
 
   def main(): Unit = {
     ws.on {
       case MouseMoveEvent(x, y) =>
-        this.x = x
-        this.y = y
         val style = s"position: absolute; left: ${x}px; top: ${y}px;"
         doc.getElementById("face-cursor").setAttribute("style", style)
-      case MouseDown(0) =>
+      case MouseClickEvent(x, y) =>
         val evt = document.createEvent("MouseEvents")
         evt.initEvent("click", true, true)
 
@@ -31,7 +29,7 @@ object CoDriver extends JSApp with Log2Console with WSSupport {
         elem.dispatchEvent(evt)
       case ScrollEvent(top, left) =>
         dom.window.scrollTo(left, top)
-      case _ => // ignore
+      case msg => error(s"unexpected WAMEvent: '${msg}")
     }
   }
 

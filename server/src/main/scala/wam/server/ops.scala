@@ -6,6 +6,8 @@ import org.http4s._
 import org.http4s.EntityEncoder.Entity
 import org.jsoup.nodes.Document
 
+
+
 import scalaz.concurrent.Task
 
 object ops {
@@ -29,5 +31,7 @@ object ops {
       uri.copy(authority = Some(Authority(userInfo, RegName(host), port)))
     }
   }
+
+
 
 }

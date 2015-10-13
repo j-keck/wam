@@ -63,7 +63,6 @@ lazy val client = WAMPrj("client").
     libraryDependencies ++=
       Seq(
         "org.scala-js" %%% "scalajs-dom" % "0.8.2",
-        "com.lihaoyi" %%% "scalatags" % "0.5.2",
         "sodium" %%% "sodium" % "1.0"
       )
   )

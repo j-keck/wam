@@ -12,7 +12,7 @@ import wam.shared._
 trait WSSupport {
   self: log.LogSupport =>
 
-  lazy val ws = new {
+  val ws = new {
     private val socket = webSocket("wam-events")
     socket.onopen = (e: Event) => debug(s"ws connected")
     socket.onerror = (e: ErrorEvent) => error(s"ws error: ${e.message}")
