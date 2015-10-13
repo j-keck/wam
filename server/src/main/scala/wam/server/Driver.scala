@@ -30,7 +30,7 @@ trait Driver {
 
   val wamEvents: Topic[WAMEvent]
 
-  val driverService = HttpService {
+  def driverService(host: String, port: Int) = HttpService {
     case req@GET -> Root / "wam-events" =>
 
       // FIXME: request should be delayed until the response is cached
@@ -58,9 +58,8 @@ trait Driver {
         """.stripMargin
 
 
-      val newUri = req.uri.copy(authority = Some(Authority(None, RegName("localhost"), None)))
       val content: Throwable \/ Response = for {
-        res <- defaultClient(newUri).map(cacheResponse(req.uri, _)).attemptRun
+        res <- defaultClient(req.uri.withHost(host, port)).map(cacheResponse(req.uri, _)).attemptRun
         txt <- res.as[String].attemptRun
         doc <- Task(Jsoup.parse(txt)).attemptRun
         _ = doc.body.append(fragment)
@@ -72,7 +71,7 @@ trait Driver {
 
       // proxy
       val content: Throwable \/ Response = for {
-        res <- defaultClient(req.uri.withHost("localhost")).attemptRun
+        res <- defaultClient(req.uri.withHost(host, port)).attemptRun
       } yield cacheResponse(req.uri, res)
 
       content.fold(e => InternalServerError(e.getMessage), Task.now)

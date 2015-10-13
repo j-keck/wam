@@ -33,6 +33,7 @@ lazy val server = WAMPrj("server").
   dependsOn(shared).
   settings(
     Revolver.settings,
+    resolvers += Resolver.sonatypeRepo("public"),
     resourceGenerators in Compile <+= Def.task {
       val files = ((crossTarget in(client, Compile)).value ** ("*.js" || "*.map")).get
       val mappings: Seq[(File, String)] = files pair rebase((crossTarget in(client, Compile)).value, ((resourceManaged in Compile).value).getAbsolutePath)
@@ -49,7 +50,8 @@ lazy val server = WAMPrj("server").
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-blaze-client" % http4sVersion,
         "org.jsoup" % "jsoup" % "1.8.3",
-        "ch.qos.logback" % "logback-classic" % "1.1.3"
+        "ch.qos.logback" % "logback-classic" % "1.1.3",
+        "com.github.scopt" %% "scopt" % "3.3.0"
       )
     }
   )

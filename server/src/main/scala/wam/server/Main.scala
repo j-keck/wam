@@ -23,24 +23,28 @@ object Main extends App with InMemoryResponseCache with  Driver with CoDriver{
       StaticFile.fromResource(s"/client-fastopt.js", Some(req)).fold(NotFound(s"'script not found"))(Task.now)
   }
 
+  
+  Config(args) match {
+    case Some(cfg) =>
+      val latch = new CountDownLatch(2)
 
-  val latch = new CountDownLatch(2)
+      // startup the driver
+      BlazeBuilder.bindHttp(8000, "0.0.0.0")
+        .withWebSockets(true)
+        .mountService(driverService(cfg.host, cfg.port), "/")
+        .run
+        .onShutdown(latch.countDown())
 
+      // startup the co-driver
+      BlazeBuilder.bindHttp(8001, "0.0.0.0")
+        .withWebSockets(true)
+        .mountService(coDriverService, "/")
+        .run
+        .onShutdown(latch.countDown())
 
-  // startup the driver
-  BlazeBuilder.bindHttp(8000, "0.0.0.0")
-    .withWebSockets(true)
-    .mountService(driverService, "/")
-    .run
-    .onShutdown(latch.countDown())
+      // wait for shutdown
+      latch.await()
 
-  // startup the co-driver
-  BlazeBuilder.bindHttp(8001, "0.0.0.0")
-    .withWebSockets(true)
-    .mountService(coDriverService, "/")
-    .run
-    .onShutdown(latch.countDown())
-
-  // wait for shutdown
-  latch.await()
+    case _ =>
+  }
 }

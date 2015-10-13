@@ -26,9 +26,9 @@ object ops {
   }
 
   implicit class UriOps(val uri: Uri) extends AnyVal {
-    def withHost(host: String, port: Option[Int] = None) = {
+    def withHost(host: String, port: Int) = {
       val userInfo = uri.authority.flatMap(_.userInfo)
-      uri.copy(authority = Some(Authority(userInfo, RegName(host), port)))
+      uri.copy(authority = Some(Authority(userInfo, RegName(host), Some(port))))
     }
   }
 
