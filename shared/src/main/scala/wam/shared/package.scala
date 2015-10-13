@@ -44,4 +44,12 @@ package object shared {
     implicit val discriminator: Discriminator[WAMEvent, ScrollEvent, Int] = Discriminator(3)
   }
 
+  /**
+   * text input event
+   */
+  case class TextInput(text: String) extends WAMEvent
+
+  object TextInput{
+    implicit val discriminator: Discriminator[WAMEvent, TextInput, Int] = Discriminator(4)
+  }
 }

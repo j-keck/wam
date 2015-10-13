@@ -1,5 +1,7 @@
 package wam.client
 
+
+import org.scalajs.dom.raw.HTMLInputElement
 import sodium.{Stream, CellSink}
 import wam.shared
 
@@ -11,6 +13,7 @@ import wam.client.log._
 import wam.client.ops._
 import wam.shared._
 import scala.concurrent.duration._
+import scala.util.Try
 
 object Driver extends JSApp with Log2Console with WSSupport {
 
@@ -19,8 +22,6 @@ object Driver extends JSApp with Log2Console with WSSupport {
 
   def main(): Unit = {
     type MousePos = (Double, Double)
-    type ScrollPos = (Int, Int)
-
     val mousePos = new CellSink[MousePos](0, 0)
     doc.onmousemove = (e: MouseEvent) => {
       mousePos.send(e.clientX -> e.clientY)
@@ -32,10 +33,21 @@ object Driver extends JSApp with Log2Console with WSSupport {
       mouseClick.send(false)
     }
 
-
+    type ScrollPos = (Int, Int)
     val scroll = new CellSink[ScrollPos](0, 0)
     doc.onscroll = (e: UIEvent) => {
       scroll.send(doc.body.scrollTop.toInt -> doc.body.scrollLeft.toInt)
+    }
+
+    type Input = String
+    val input = new CellSink[Input]("")
+    doc.oninput = (e: Event) => {
+      if(e.target.isInstanceOf[HTMLInputElement]){
+        val value = e.target.asInstanceOf[HTMLInputElement].value
+        input.send(value)
+      }else{
+        error(s"unexpected target element for input: ${e.target}")
+      }
     }
 
 
@@ -45,6 +57,8 @@ object Driver extends JSApp with Log2Console with WSSupport {
     mouseClick.zip(mousePos).filterMap{ case (true, (x, y)) => MouseClickEvent(x, y)}.listen(ws.send)
 
     scroll.updates.map{case (x, y) => ScrollEvent(x, y)}.listen(ws.send)
+
+    input.updates.map(TextInput.apply).listen(ws.send)
   }
 
 }
