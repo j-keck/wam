@@ -30,16 +30,12 @@ trait CoDriver {
       val src: Process[Task, Text] = wamEvents.subscribe.map(e => Text(Codec[WAMEvent].encode(e).require.toHex))
       WS(Exchange(src, Process.halt))
 
-    // FIXME: this endpoint as 'commonSerivce' in Main
-    case req@GET -> Root / "client-fastopt.js" =>
-      StaticFile.fromResource(s"/client-fastopt.js", Some(req)).fold(NotFound(s"'script not found"))(Task.now)
-
     case req if req.isAppEntryPoint =>
 
       val fragment =
         """
           |<script src="/client-fastopt.js"></script>
-          |<span id="face-cursor">&#128045;</span>
+          |<span id="face-cursor">&#8598;</span>
           |<script type="text/javascript">
           |  wam.client.CoDriver().main()
           |</script>

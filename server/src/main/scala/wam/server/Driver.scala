@@ -43,9 +43,6 @@ trait Driver {
 
       WS(Exchange(Process.halt, snk))
 
-    // FIXME: this endpoint as 'commonSerivce' in Main
-    case req@GET -> Root / "client-fastopt.js" =>
-      StaticFile.fromResource(s"/client-fastopt.js", Some(req)).fold(NotFound(s"'script not found"))(Task.now)
 
     case req if req.isAppEntryPoint =>
 
