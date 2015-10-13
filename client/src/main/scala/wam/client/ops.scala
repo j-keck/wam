@@ -9,7 +9,7 @@ import scala.concurrent.duration.Duration
 object ops {
 
 
-  implicit class CellOps[A](ca: Cell[A]) {
+  implicit class CellOps[A](val ca: Cell[A]) extends AnyVal {
     def zip[B](cb: Cell[B]): Cell[(A, B)] =
       ca.lift((a, b: B) => (a, b), cb)
 
@@ -42,7 +42,7 @@ object ops {
     }
   }
 
-  implicit class StreamOps[A](sa: Stream[A]) {
+  implicit class StreamOps[A](val sa: Stream[A]) extends AnyVal {
     def accum[S](s: S)(f: (A, S) => S): Cell[S] = sa.accum(s, f)
   }
 
@@ -50,5 +50,19 @@ object ops {
   implicit class MouseEventOps(val e: MouseEvent) extends AnyVal {
     def fromLeftBtn: Boolean = e.button == 0
   }
+
+  implicit class ElementOps(val e: Element) extends AnyVal {
+
+    def hide: Unit = {
+      val style = e.getAttribute("style")
+      e.setAttribute("style", style + ";display: none;")
+    }
+
+    def show: Unit = {
+      val style = e.getAttribute("style")
+      e.setAttribute("style", style.replaceAll(";display: none;", ""))
+    }
+  }
+
 
 }
