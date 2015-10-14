@@ -58,6 +58,7 @@ lazy val server = WAMPrj("server").
     },
 
     compile <<= (compile in Compile) dependsOn (fastOptJS in Compile in client),
+    assembly <<= assembly dependsOn (fullOptJS in (client, Compile)),
 
     libraryDependencies ++= {
       val http4sVersion = "0.10.0"

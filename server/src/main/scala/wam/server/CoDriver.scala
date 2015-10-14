@@ -35,7 +35,7 @@ trait CoDriver {
 
       val fragment =
         """
-          |<script src="/client-fastopt.js"></script>
+          |<script src="/wam-app.js"></script>
           |<span id="face-cursor">&#8598;</span>
           |<script type="text/javascript">
           |  wam.client.CoDriver().main()
