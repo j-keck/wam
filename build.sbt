@@ -1,5 +1,10 @@
 name := "wam"
 
+// sbt tasks
+val gitDescribe = taskKey[String]("result from 'git describe --tags'")
+val makeVersionProps = taskKey[Seq[File]]("creates a version.properties file")
+
+
 def WAMPrj(name: String): Project = {
   Project(name, file(name)).
     settings(
@@ -15,6 +20,13 @@ def WAMPrj(name: String): Project = {
         case "JS_DEPENDENCIES" => MergeStrategy.discard
         case x => (assemblyMergeStrategy in assembly).value(x)
       },
+      makeVersionProps := {
+          val propFile = (resourceManaged in Compile).value / "version.properties"
+          val content = s"version=${gitDescribe.value}"
+          IO.write(propFile, content)
+          Seq(propFile)
+        },
+      resourceGenerators in Compile <+= makeVersionProps,
       libraryDependencies ++= {
         Seq(
           "org.scodec" %% "scodec-core" % "1.8.2",
@@ -74,4 +86,3 @@ lazy val client = WAMPrj("client").
   )
 
 
-val gitDescribe = taskKey[String]("result from 'git describe --tags'")
