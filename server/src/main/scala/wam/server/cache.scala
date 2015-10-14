@@ -11,6 +11,7 @@ import scalaz.stream.Process
 object cache {
 
   class CacheException(msg: String) extends Throwable(msg)
+  class NotCachedException(msg: String) extends CacheException(msg)
 
   trait ResponseCache {
     def cacheResponse(uri: Uri, res: Response): Response
@@ -33,7 +34,7 @@ object cache {
 
 
     def responseFromCache(uri: Uri): CacheException \/ Response = Option (cacheMap.get(uri)).
-      fold[CacheException \/ Response](new CacheException(s"not cached - uri: $uri").left)(_.right)
+      fold[CacheException \/ Response](new NotCachedException(s"not cached - uri: $uri").left)(_.right)
   }
 
 }

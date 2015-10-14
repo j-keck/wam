@@ -32,8 +32,7 @@ trait Driver {
 
   def driverService(host: String, port: Int) = HttpService {
     case req@GET -> Root / "wam-events" =>
-
-      // FIXME: request should be delayed until the response is cached
+      
       val snk: Channel[Task, WebSocketFrame, Unit] = wamEvents.publish.contramap(_ match {
         case Text(txt, _) => (for {
           b <- BitVector.fromHex(txt).fold[String \/ BitVector]("invalid hex string received".left)(_.right)

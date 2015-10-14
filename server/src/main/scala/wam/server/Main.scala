@@ -4,9 +4,9 @@ import java.util.concurrent.CountDownLatch
 
 import org.http4s.StaticFile
 import org.http4s.dsl._
-import org.http4s.server.syntax.ServiceOps
-import org.http4s.server.{Service, HttpService}
+import org.http4s.server.HttpService
 import org.http4s.server.blaze.BlazeBuilder
+import org.http4s.server.syntax.ServiceOps
 import wam.server.cache.InMemoryResponseCache
 import wam.shared.WAMEvent
 
@@ -15,13 +15,12 @@ import scalaz.stream.async._
 import scalaz.stream.async.mutable.Topic
 
 
-
-object Main extends App with InMemoryResponseCache with  Driver with CoDriver{
+object Main extends App with InMemoryResponseCache with Driver with CoDriver {
   override val wamEvents: Topic[WAMEvent] = topic[WAMEvent]()
 
   val commonService = HttpService {
     case req@GET -> Root / "client-fastopt.js" =>
-      StaticFile.fromResource(s"/client-fastopt.js", Some(req)).fold(NotFound(s"'script not found"))(Task.now)
+      StaticFile.fromResource(s"/client-fastopt.js", Some(req)).fold(NotFound(s"script not found"))(Task.now)
   }
 
   Config(args) match {
