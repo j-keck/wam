@@ -1,9 +1,5 @@
 name := "wam"
 
-version := "1.0"
-
-scalaVersion := "2.11.7"
-
 def WAMPrj(name: String): Project = {
   Project(name, file(name)).
     settings(
@@ -13,11 +9,17 @@ def WAMPrj(name: String): Project = {
       resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
       resolvers += "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/",
       //scalacOptions ++= Seq("-Xlog-implicits"),
+      assemblyMergeStrategy in assembly := {
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList(p @ _*) if p.exists(_.contains("sjs")) => MergeStrategy.discard
+        case "JS_DEPENDENCIES" => MergeStrategy.discard
+        case x => (assemblyMergeStrategy in assembly).value(x)
+      },
       libraryDependencies ++= {
         Seq(
           "org.scodec" %% "scodec-core" % "1.8.2",
           "org.scodec" %% "scodec-scalaz" % "1.1.0",
-          "org.scodec" %%% "scodec-core" % "1.8.2",
+          "org.scodec" %%% "scodec-core" % "1.8.2" % "provided",
           "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
         )
       }
@@ -32,6 +34,8 @@ lazy val shared = WAMPrj("shared").
 lazy val server = WAMPrj("server").
   dependsOn(shared).
   settings(
+    assemblyJarName <<= gitDescribe map (v => s"wam-$v.jar"),
+    gitDescribe in ThisBuild := Process("git describe --tags").lines.head,
     Revolver.settings,
     resolvers += Resolver.sonatypeRepo("public"),
     resourceGenerators in Compile <+= Def.task {
@@ -70,4 +74,4 @@ lazy val client = WAMPrj("client").
   )
 
 
-
+val gitDescribe = taskKey[String]("result from 'git describe --tags'")
