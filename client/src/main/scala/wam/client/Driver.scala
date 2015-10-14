@@ -33,21 +33,26 @@ object Driver extends JSApp with Log2Console with WSSupport {
       mouseClick.send(false)
     }
 
-    type ScrollPos = (Int, Int)
-    val scroll = new CellSink[ScrollPos](0, 0)
+
+    val scroll = new CellSink[ScrollEvent](ScrollEvent(0, 0))
     doc.onscroll = (e: UIEvent) => {
-      scroll.send(doc.body.scrollTop.toInt -> doc.body.scrollLeft.toInt)
+      scroll.send(ScrollEvent(doc.body.scrollTop.toInt, doc.body.scrollLeft.toInt))
     }
 
-    type Input = String
-    val input = new CellSink[Input]("")
+
+    val input = new CellSink[TextInput](TextInput(""))
     doc.oninput = (e: Event) => {
       if(e.target.isInstanceOf[HTMLInputElement]){
         val value = e.target.asInstanceOf[HTMLInputElement].value
-        input.send(value)
+        input.send(TextInput(value))
       }else{
         error(s"unexpected target element for input: ${e.target}")
       }
+    }
+
+    val windowSize = new CellSink[WindowSize](WindowSize(dom.innerWidth, dom.innerHeight))
+    dom.onresize = (e: UIEvent) => {
+      windowSize.send(WindowSize(dom.innerWidth, dom.innerHeight))
     }
 
 
@@ -56,9 +61,13 @@ object Driver extends JSApp with Log2Console with WSSupport {
 
     mouseClick.zip(mousePos).filterMap{ case (true, (x, y)) => MouseClickEvent(x, y)}.listen(ws.send)
 
-    scroll.updates.map{case (x, y) => ScrollEvent(x, y)}.listen(ws.send)
+    scroll.updates.listen(ws.send)
 
-    input.updates.map(TextInput.apply).listen(ws.send)
+    input.updates.listen(ws.send)
+
+    // send window resize updates and every 5sec. also, so later connected co-driver
+    // receives the window size also.
+    windowSize.repeat(5.second).value.listen(ws.send)
   }
 
 }

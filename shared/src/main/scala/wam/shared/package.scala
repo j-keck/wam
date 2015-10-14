@@ -52,4 +52,14 @@ package object shared {
   object TextInput{
     implicit val discriminator: Discriminator[WAMEvent, TextInput, Int] = Discriminator(4)
   }
+
+
+  /**
+   * driver browser size
+   */
+  case class WindowSize(width: Int, height: Int) extends WAMEvent
+
+  object WindowSize {
+    implicit val discriminator: Discriminator[WAMEvent, WindowSize, Int] = Discriminator(5)
+  }
 }

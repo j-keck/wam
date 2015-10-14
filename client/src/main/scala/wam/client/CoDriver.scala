@@ -45,6 +45,10 @@ object CoDriver extends JSApp with Log2Console with WSSupport {
           error(s"input event but no input element active - active element: ${doc.activeElement}")
         }
 
+      case WindowSize(width, height) =>
+        val style = s"position: absolute; left: 0px; top: 0px; width: ${width}px; height: ${height}px;border: 1px solid red; z-index: -1;"
+        doc.getElementById("driver-window-border").setAttribute("style", style)
+
       case msg => error(s"unexpected WAMEvent: '${msg}")
     }
   }

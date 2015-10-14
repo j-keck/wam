@@ -27,6 +27,9 @@ object ops {
       }.hold(last)
     }
 
+    def repeat(duration: Duration): Cell[A] = {
+      every(duration).map(_ => ca.sample)
+    }
 
     private def every(duration: Duration): Cell[Long] = {
       val ticker = new CellSink[Long](System.currentTimeMillis())

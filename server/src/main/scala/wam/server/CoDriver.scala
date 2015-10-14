@@ -37,6 +37,7 @@ trait CoDriver {
         """
           |<script src="/wam-app.js"></script>
           |<span id="face-cursor">&#8598;</span>
+          |<span id="driver-window-border"></span>
           |<script type="text/javascript">
           |  wam.client.CoDriver().main()
           |</script>
