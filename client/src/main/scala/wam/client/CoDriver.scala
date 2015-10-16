@@ -20,7 +20,7 @@ object CoDriver extends JSApp with Log2Console with WSSupport {
   def main(): Unit = {
     ws.on {
       case MouseMoveEvent(x, y) =>
-        val style = s"position: absolute; left: ${x}px; top: ${y}px;"
+        val style = s"position: absolute; left: ${x + dom.pageXOffset}px; top: ${y + dom.pageYOffset}px;"
         faceCursor.setAttribute("style", style)
 
       case MouseClickEvent(x, y) =>
@@ -50,6 +50,7 @@ object CoDriver extends JSApp with Log2Console with WSSupport {
       case msg => error(s"unexpected WAMEvent: '${msg}")
     }
   }
+
 
   private def faceCursor: Element = doc.getElementById("face-cursor")
 
