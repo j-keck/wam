@@ -23,6 +23,8 @@ object ops {
   implicit class RequestOps(val req: Request) extends AnyVal {
     def isAppEntryPoint(root: String = "/"): Boolean =
       req.uri.path.equals("/") || Seq("index.html", root).exists(req.uri.path.endsWith)
+
+    def withHost(host: String, port: Int) = req.copy(uri = req.uri.withHost(host, port))
   }
 
   implicit class UriOps(val uri: Uri) extends AnyVal {

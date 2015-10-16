@@ -57,7 +57,7 @@ trait Driver {
 
 
       val content: Throwable \/ Response = for {
-        res <- defaultClient(req.uri.withHost(cfg.host, cfg.port)).map(cacheResponse(req.uri, _)).attemptRun
+        res <- defaultClient(req.withHost(cfg.host, cfg.port)).map(cacheResponse(req.uri, _)).attemptRun
         txt <- res.as[String].attemptRun
         doc <- Task(Jsoup.parse(txt)).attemptRun
         _ = doc.body.append(fragment)
@@ -69,7 +69,7 @@ trait Driver {
 
       // proxy
       val content: Throwable \/ Response = for {
-        res <- defaultClient(req.uri.withHost(cfg.host, cfg.port)).attemptRun
+        res <- defaultClient(req.withHost(cfg.host, cfg.port)).attemptRun
       } yield cacheResponse(req.uri, res)
 
         content.fold(e => InternalServerError(e.getMessage), Task.now)
