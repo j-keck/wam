@@ -13,6 +13,7 @@ object cache {
   class CacheException(msg: String) extends Throwable(msg)
   class NotCachedException(msg: String) extends CacheException(msg)
 
+  // TODO: add lru memory cache
   trait ResponseCache {
     def cacheResponse(uri: Uri, res: Response): Response
 

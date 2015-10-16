@@ -1,29 +1,25 @@
 package wam.server
 
-import org.http4s.{StaticFile, Response}
-import org.http4s.Uri.{RegName, Authority}
+import org.http4s.Response
 import org.http4s.client.blaze._
 import org.http4s.dsl._
 import org.http4s.server.HttpService
-import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.websocket.WS
 import org.http4s.websocket.WebsocketBits.{Text, WebSocketFrame}
-
 import org.jsoup.Jsoup
 import scodec.Codec
-import scodec.bits.BitVector
 import scodec.codecs.implicits._
+import scodec.bits.BitVector
 import scodec.interop.scalaz._
+import wam.server.cache.ResponseCache
+import wam.server.ops._
+import wam.shared._
 
 import scalaz.\/
-import scalaz.syntax.either._
 import scalaz.concurrent.Task
 import scalaz.stream._
 import scalaz.stream.async.mutable.Topic
-
-import wam.server.ops._
-import wam.server.cache.ResponseCache
-import wam.shared._
+import scalaz.syntax.either._
 
 trait Driver {
   self: ResponseCache =>
@@ -45,7 +41,6 @@ trait Driver {
 
 
       case req if req.isAppEntryPoint(cfg.root) =>
-
         val fragment =
           """
             |<script src="/wam-app.js"></script>
@@ -54,7 +49,6 @@ trait Driver {
             |</script>
           """.
             stripMargin
-
 
         val content: Throwable \/ Response = for {
           res <- defaultClient(req.withHost(cfg.host, cfg.port)).map(cacheResponse(req.uri, _)).attemptRun
@@ -66,7 +60,6 @@ trait Driver {
         content.fold(e => InternalServerError(e.getMessage), Task.now)
 
       case req =>
-
         // proxy
         val content: Throwable \/ Response = for {
           res <- defaultClient(req.withHost(cfg.host, cfg.port)).attemptRun

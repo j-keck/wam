@@ -55,17 +55,7 @@ trait CoDriver {
         content.fold(e => InternalServerError(e.getMessage), Task.now)
 
       case req =>
-        // FIXME: remove this hack
-        def tryServeFromCache(uri: Uri, attempt: Int): Task[Response] = responseFromCache(uri).fold(_ match {
-          case _: NotCachedException if (attempt > 0) =>
-            logger.info(s"content for uri: ${uri} not avaliable... recheck ${attempt} times")
-            // FIXME: delay configurable
-            Task.schedule(tryServeFromCache(uri, attempt - 1), 1.second).flatMap(identity)
-          case e => InternalServerError(e.getMessage)
-        }
-          , Task.now)
-
-        tryServeFromCache(req.uri, 10)
+        responseFromCache(req.uri).fold(e => NotFound(e.getMessage), Task.now)
     }
   }
 }
