@@ -28,7 +28,7 @@ object Driver extends JSApp with Log2Console with WSSupport {
     }
 
     val mouseClick = new CellSink[Boolean](false)
-    doc.onmousedown = (e: MouseEvent) => {
+    doc.onclick = (e: MouseEvent) => {
       mouseClick.send(e.fromLeftBtn)
       mouseClick.send(false)
     }
