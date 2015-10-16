@@ -2,7 +2,7 @@ package wam.client
 
 import org.scalajs.dom
 import org.scalajs.dom._
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{HTMLButtonElement, HTMLFormElement, HTMLInputElement}
 
 import wam.client.log.Log2Console
 import wam.shared._
@@ -24,26 +24,24 @@ object CoDriver extends JSApp with Log2Console with WSSupport {
         faceCursor.setAttribute("style", style)
 
       case MouseClickEvent(x, y) =>
-        val elem = elementFromPoint(x, y)
-        if(elem.isInstanceOf[HTMLInputElement]){
-          // it's a input element - trigger focus
-          elem.asInstanceOf[HTMLInputElement].focus()
-        }else {
-          // trigger a click event
-          val evt = document.createEvent("MouseEvents")
-          evt.initEvent("click", true, true)
-          elem.dispatchEvent(evt)
+        elementFromPoint(x, y) match {
+          case e: HTMLButtonElement => e.click()
+          case e: HTMLInputElement if e.`type` == "submit" => e.form.submit()
+          case e: HTMLInputElement => e.focus()
+          case elem =>
+            // trigger a click event
+            val evt = document.createEvent("MouseEvents")
+            evt.initEvent("click", true, true)
+            elem.dispatchEvent(evt)
         }
 
       case ScrollEvent(top, left) =>
         dom.window.scrollTo(left, top)
 
-      case TextInput(text) =>
-        if(doc.activeElement.isInstanceOf[HTMLInputElement]){
-          doc.activeElement.asInstanceOf[HTMLInputElement].value = text
-        }else{
-          error(s"input event but no input element active - active element: ${doc.activeElement}")
-        }
+      case TextInput(text) => doc.activeElement match {
+        case e: HTMLInputElement => e.value = text
+        case e => error(s"input event but no input element active - active element: ${e}")
+      }
 
       case WindowSize(width, height) =>
         val style = s"position: absolute; left: 0px; top: 0px; width: ${width}px; height: ${height}px;border: 1px solid red; z-index: -1;"
