@@ -56,21 +56,21 @@ trait Driver {
             stripMargin
 
 
-      val content: Throwable \/ Response = for {
-        res <- defaultClient(req.withHost(cfg.host, cfg.port)).map(cacheResponse(req.uri, _)).attemptRun
-        txt <- res.as[String].attemptRun
-        doc <- Task(Jsoup.parse(txt)).attemptRun
-        _ = doc.body.append(fragment)
-      } yield res.withBody(doc).run
+        val content: Throwable \/ Response = for {
+          res <- defaultClient(req.withHost(cfg.host, cfg.port)).map(cacheResponse(req.uri, _)).attemptRun
+          txt <- res.as[String].attemptRun
+          doc <- Task(Jsoup.parse(txt)).attemptRun
+          _ = doc.body.append(fragment)
+        } yield res.withBody(doc).run
 
         content.fold(e => InternalServerError(e.getMessage), Task.now)
 
       case req =>
 
-      // proxy
-      val content: Throwable \/ Response = for {
-        res <- defaultClient(req.withHost(cfg.host, cfg.port)).attemptRun
-      } yield cacheResponse(req.uri, res)
+        // proxy
+        val content: Throwable \/ Response = for {
+          res <- defaultClient(req.withHost(cfg.host, cfg.port)).attemptRun
+        } yield cacheResponse(req.uri, res)
 
         content.fold(e => InternalServerError(e.getMessage), Task.now)
     }
