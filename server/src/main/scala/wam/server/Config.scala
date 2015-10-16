@@ -4,7 +4,8 @@ import scopt.OptionParser
 
 import java.util.Properties
 
-case class Config(host: String = "", port: Int = 80)
+
+case class Config(host: String = "", port: Int = 80, root: String = "/")
 
 object Config {
   private val wamVersion = {
@@ -19,6 +20,7 @@ object Config {
     head("wam", wamVersion)
     opt[String]('h', "host") required() action{ (h, c) => c.copy(host = h)} text("host name from the wrapped app")
     opt[Int]('p', "port") action{ (p, c) => c.copy(port = p)} text("port from the wrapped app (default: 80)")
+    opt[String]('r', "root") action{ (r, c) => c.copy(root = r)} text("document root from the wrapped app")
   }
 
   def apply(args: Array[String]): Option[Config] =

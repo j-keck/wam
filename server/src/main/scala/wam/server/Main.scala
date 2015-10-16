@@ -31,14 +31,14 @@ object Main extends App with InMemoryResponseCache with Driver with CoDriver {
       // startup the driver
       BlazeBuilder.bindHttp(8000, "0.0.0.0")
         .withWebSockets(true)
-        .mountService(driverService(cfg.host, cfg.port) orElse commonService, "/")
+        .mountService(driverService(cfg) orElse commonService, "/")
         .run
         .onShutdown(latch.countDown())
 
       // startup the co-driver
       BlazeBuilder.bindHttp(8001, "0.0.0.0")
         .withWebSockets(true)
-        .mountService(coDriverService orElse commonService, "/")
+        .mountService(coDriverService(cfg) orElse commonService, "/")
         .run
         .onShutdown(latch.countDown())
 

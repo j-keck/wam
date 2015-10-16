@@ -21,8 +21,8 @@ object ops {
 
 
   implicit class RequestOps(val req: Request) extends AnyVal {
-    def isAppEntryPoint: Boolean =
-      req.uri.path.equals("/") || Seq("index.html").exists(req.uri.path.endsWith)
+    def isAppEntryPoint(root: String = "/"): Boolean =
+      req.uri.path.equals("/") || Seq("index.html", root).exists(req.uri.path.endsWith)
   }
 
   implicit class UriOps(val uri: Uri) extends AnyVal {

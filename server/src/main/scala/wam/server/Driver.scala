@@ -30,46 +30,49 @@ trait Driver {
 
   val wamEvents: Topic[WAMEvent]
 
-  def driverService(host: String, port: Int) = HttpService {
-    case req@GET -> Root / "wam-events" =>
+  def driverService: Configured[HttpService] = { cfg =>
+    HttpService {
+      case req@GET -> Root / "wam-events" =>
 
-      val snk: Channel[Task, WebSocketFrame, Unit] = wamEvents.publish.contramap(_ match {
-        case Text(txt, _) => (for {
-          b <- BitVector.fromHex(txt).fold[String \/ BitVector]("invalid hex string received".left)(_.right)
-          c <- Codec[WAMEvent].decodeValue(b).toDisjunction.leftMap(_.message)
-        } yield c).fold(msg => throw new Exception(msg), identity)
-      })
+        val snk: Channel[Task, WebSocketFrame, Unit] = wamEvents.publish.contramap(_ match {
+          case Text(txt, _) => (for {
+            b <- BitVector.fromHex(txt).fold[String \/ BitVector]("invalid hex string received".left)(_.right)
+            c <- Codec[WAMEvent].decodeValue(b).toDisjunction.leftMap(_.message)
+          } yield c).fold(msg => throw new Exception(msg), identity)
+        })
 
-      WS(Exchange(Process.halt, snk))
+        WS(Exchange(Process.halt, snk))
 
 
-    case req if req.isAppEntryPoint =>
+      case req if req.isAppEntryPoint(cfg.root) =>
 
-      val fragment =
-        """
-          |<script src="/wam-app.js"></script>
-          |<script type="text/javascript">
-          |  wam.client.Driver().main()
-          |</script>
-        """.stripMargin
+        val fragment =
+          """
+            |<script src="/wam-app.js"></script>
+            |<script type="text/javascript">
+            |  wam.client.Driver().main()
+            |</script>
+          """.
+            stripMargin
 
 
       val content: Throwable \/ Response = for {
-        res <- defaultClient(req.uri.withHost(host, port)).map(cacheResponse(req.uri, _)).attemptRun
+        res <- defaultClient(req.uri.withHost(cfg.host, cfg.port)).map(cacheResponse(req.uri, _)).attemptRun
         txt <- res.as[String].attemptRun
         doc <- Task(Jsoup.parse(txt)).attemptRun
         _ = doc.body.append(fragment)
       } yield res.withBody(doc).run
 
-      content.fold(e => InternalServerError(e.getMessage), Task.now)
+        content.fold(e => InternalServerError(e.getMessage), Task.now)
 
-    case req =>
+      case req =>
 
       // proxy
       val content: Throwable \/ Response = for {
-        res <- defaultClient(req.uri.withHost(host, port)).attemptRun
+        res <- defaultClient(req.uri.withHost(cfg.host, cfg.port)).attemptRun
       } yield cacheResponse(req.uri, res)
 
-      content.fold(e => InternalServerError(e.getMessage), Task.now)
+        content.fold(e => InternalServerError(e.getMessage), Task.now)
+    }
   }
 }
